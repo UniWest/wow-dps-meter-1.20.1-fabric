@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Minecraft / Fabric Loom
+run/
+.fabric/
+logs/
+crash-reports/
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+*.log

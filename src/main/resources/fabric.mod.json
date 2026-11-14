@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "wowdps",
+  "version": "${version}",
+  "name": "WoW Details! DPS Meter (Prominence II Edition)",
+  "description": "World of Warcraft (Details! / Recount) DPS & Spell Meter for Minecraft 1.20.1 Fabric. Features exact Spell Engine detection, Staff/Weapon-to-Spell hierarchical breakdown, FTB Teams & Open Parties and Claims teammate integration, and freely resizable auto-adapting HUD & Inspector windows.",
+  "authors": [
+    "WowDpsDev"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "dev.wowdps.WowDpsMod"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "dev.wowdps.client.WowDpsClient"
+      }
+    ]
+  },
+  "mixins": [
+    "wowdps.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*",
+    "fabric-language-kotlin": ">=1.10.0"
+  },
+  "suggests": {
+    "ftbteams": "*",
+    "openpartiesandclaims": "*",
+    "spell_engine": "*"
+  }
+}
