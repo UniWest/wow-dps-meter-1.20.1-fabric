@@ -12,7 +12,7 @@ object WowDpsMod : ModInitializer {
     override fun onInitialize() {
         DamageHookContext.registerServerHooks()
         LOGGER.info(
-            "[WoW Details! DPS Meter v7.0] Initialized (FTB Teams loaded={}, Open Parties & Claims loaded={}).",
+            "[DPS & Spell Meter v8.2] Initialized (FTB Teams loaded={}, Open Parties & Claims loaded={}).",
             PartyTeamIntegration.isFtbTeamsLoaded,
             PartyTeamIntegration.isOpacLoaded
         )

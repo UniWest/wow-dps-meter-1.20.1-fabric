@@ -320,7 +320,7 @@ object DamageHookContext {
         val isCrit = detectCriticalHit(attackerPlayer, damageTypeKey)
         val isDummy = isTargetDummy(victim)
         val isBoss = victim is EnderDragonEntity || victim is WitherEntity || victim is WardenEntity || (!isDummy && victim.maxHealth >= 100f)
-        val victimTypeName = if (isDummy) "Манекен" else victim.type.name.string
+        val victimTypeName = if (isDummy) "@tr:wowdps.attack.dummy" else victim.type.name.string
         val victimEntityTypeId = Registries.ENTITY_TYPE.getId(victim.type).toString()
         val targetIconId = resolveTargetIconItemId(victim, victimEntityTypeId, isDummy, isBoss)
 
@@ -519,9 +519,9 @@ object DamageHookContext {
             else -> ItemStack.EMPTY
         }
         val sourceWeaponName = when {
-            viaPetOrSummon && petOrProjectileName != null -> "Питомец: $petOrProjectileName"
+            viaPetOrSummon && petOrProjectileName != null -> "@tr:wowdps.attack.pet|$petOrProjectileName"
             !sourceWeaponStack.isEmpty -> sourceWeaponStack.name.string
-            else -> "Без оружия (Руки / Книга)"
+            else -> "@tr:wowdps.wpn.bare_hands"
         }
         val sourceWeaponIconId = when {
             viaPetOrSummon -> "minecraft:bone"
@@ -538,7 +538,7 @@ object DamageHookContext {
         if (viaPetOrSummon && petOrProjectileName != null) {
             return SpellAndWeaponResult(
                 spellId = "",
-                abilityName = "Удар питомца: $petOrProjectileName",
+                abilityName = "@tr:wowdps.attack.pet|$petOrProjectileName",
                 iconItemId = "minecraft:bone",
                 spellTextureId = "",
                 magicSchool = detectedSchool,
@@ -598,7 +598,7 @@ object DamageHookContext {
             if (direct is TridentEntity) {
                 return SpellAndWeaponResult(
                     spellId = "",
-                    abilityName = "Бросок трезубца",
+                    abilityName = "@tr:wowdps.attack.trident",
                     iconItemId = "minecraft:trident",
                     spellTextureId = "",
                     magicSchool = "physical",
@@ -628,7 +628,7 @@ object DamageHookContext {
             val projName = petOrProjectileName ?: direct.name.string
             return SpellAndWeaponResult(
                 spellId = "",
-                abilityName = "Выстрел: $projName",
+                abilityName = "@tr:wowdps.attack.shot|$projName",
                 iconItemId = "minecraft:arrow",
                 spellTextureId = "",
                 magicSchool = "physical",
@@ -642,9 +642,9 @@ object DamageHookContext {
         // 4. Pure Melee Physical Strike (Sword, Axe, Staff melee hit, Fist)
         if (isMeleeDamageType && detectedSchool == "physical") {
             val meleeLabel = if (!sourceWeaponStack.isEmpty) {
-                "Удар: ${sourceWeaponStack.name.string}"
+                "@tr:wowdps.attack.melee|${sourceWeaponStack.name.string}"
             } else {
-                "Рукопашный удар"
+                "@tr:wowdps.attack.hand"
             }
             return SpellAndWeaponResult(
                 spellId = "",
@@ -975,52 +975,18 @@ object DamageHookContext {
      */
     private fun getClearSpellName(spellId: Identifier, school: String): String {
         val path = spellId.path.lowercase()
-        val knownName = when (path) {
-            // Wizards — Fire
-            "fireball" -> "Огненный шар (Fireball)"
-            "fire_breath" -> "Огненное дыхание (Fire Breath)"
-            "meteor" -> "Метеорит (Meteor)"
-            "pyroblast" -> "Огненная глыба (Pyroblast)"
-            "scorch" -> "Ожог (Scorch)"
-            "fire_nova" -> "Кольцо огня (Fire Nova)"
-            "wall_of_flames", "fire_wall" -> "Стена пламени (Wall of Flames)"
-            // Wizards — Frost
-            "frostbolt" -> "Ледяная стрела (Frostbolt)"
-            "frost_nova" -> "Кольцо льда (Frost Nova)"
-            "blizzard" -> "Снежная буря (Blizzard)"
-            "ice_lance" -> "Ледяное копьё (Ice Lance)"
-            "frost_shield" -> "Ледяной щит (Frost Shield)"
-            "cold_snap" -> "Холодная хватка (Cold Snap)"
-            // Wizards — Arcane
-            "arcane_bolt" -> "Тайная стрела (Arcane Bolt)"
-            "arcane_missile", "arcane_missiles" -> "Тайные стрелы (Arcane Missiles)"
-            "arcane_beam" -> "Тайный луч (Arcane Beam)"
-            "arcane_blast" -> "Тайная вспышка (Arcane Blast)"
-            "blink" -> "Скачок (Blink)"
-            // Paladins & Priests
-            "holy_shock" -> "Шок небес (Holy Shock)"
-            "judgement" -> "Правосудие (Judgement)"
-            "divine_storm" -> "Божественная буря (Divine Storm)"
-            "consecration" -> "Освящение (Consecration)"
-            "smite" -> "Кара (Smite)"
-            "holy_fire" -> "Священный огонь (Holy Fire)"
-            "penance" -> "Исповедь (Penance)"
-            // Archers & Rogues
-            "power_shot" -> "Мощный выстрел (Power Shot)"
-            "barrage" -> "Град стрел (Barrage)"
-            "magic_arrow" -> "Магическая стрела (Magic Arrow)"
-            "entangling_roots" -> "Гнев природы (Entangling Roots)"
-            "whirlwind" -> "Вихрь клинков (Whirlwind)"
-            "shadowstep" -> "Шаг сквозь тень (Shadowstep)"
-            // Simply Swords & SoulsWeapons
-            "ember_ire", "ember_slash" -> "Пламенный разрез (Ember Slash)"
-            "frostfall", "frost_slash" -> "Ледяной обвал (Frostfall)"
-            "arcane_surge" -> "Выброс арканы (Arcane Surge)"
-            "storm_call", "lightning_strike" -> "Удар молнии (Storm Call)"
-            "soul_rend", "soul_harvest" -> "Жатва душ (Soul Harvest)"
-            else -> null
+        val knownKeys = setOf(
+            "fireball", "fire_breath", "meteor", "pyroblast", "scorch", "fire_nova", "wall_of_flames", "fire_wall",
+            "frostbolt", "frost_nova", "blizzard", "ice_lance", "frost_shield", "cold_snap",
+            "arcane_bolt", "arcane_missile", "arcane_missiles", "arcane_beam", "arcane_blast", "blink",
+            "holy_shock", "judgement", "divine_storm", "consecration", "smite", "holy_fire", "penance",
+            "power_shot", "barrage", "magic_arrow", "entangling_roots", "whirlwind", "shadowstep",
+            "ember_ire", "ember_slash", "frostfall", "frost_slash", "arcane_surge", "storm_call", "lightning_strike",
+            "soul_rend", "soul_harvest"
+        )
+        if (path in knownKeys) {
+            return "@tr:wowdps.spell.$path"
         }
-        if (knownName != null) return knownName
 
         val prettyEn = spellId.path.split('_', '/').joinToString(" ") {
             it.replaceFirstChar { c -> c.uppercase() }
@@ -1031,35 +997,32 @@ object DamageHookContext {
     private fun getClearSchoolSpellName(school: String, damageTypeKey: String, isProjectile: Boolean): String {
         val cleanPath = damageTypeKey.substringAfter(":")
         return when (school) {
-            "fire" -> if (isProjectile) "Огненный снаряд (Магия Огня)" else if (cleanPath.contains("fire") && !damageTypeKey.startsWith("spell_power")) "Горение (Огонь)" else "Магия Огня (Заклинание)"
-            "frost" -> if (isProjectile) "Ледяной осколок (Магия Льда)" else "Магия Льда (Заклинание)"
-            "arcane" -> if (isProjectile) "Тайный снаряд (Аркана)" else "Тайная Магия (Аркана)"
-            "lightning" -> "Разряд Молнии (Заклинание)"
-            "soul" -> "Магия Душ (Заклинание)"
-            "holy" -> "Магия Света (Кара)"
-            "blood" -> "Магия Крови (Кровотечение)"
-            "void" -> "Магия Бездны (Тьма)"
-            "nature" -> "Магия Природы (Яд / Шипы)"
-            else -> "Магическое заклинание"
+            "fire" -> if (isProjectile) "@tr:wowdps.school.spell_fire_proj" else if (cleanPath.contains("fire") && !damageTypeKey.startsWith("spell_power")) "@tr:wowdps.school.spell_fire_burn" else "@tr:wowdps.school.spell_fire_spell"
+            "frost" -> if (isProjectile) "@tr:wowdps.school.spell_frost_proj" else "@tr:wowdps.school.spell_frost_spell"
+            "arcane" -> if (isProjectile) "@tr:wowdps.school.spell_arcane_proj" else "@tr:wowdps.school.spell_arcane_spell"
+            "lightning" -> "@tr:wowdps.school.spell_lightning"
+            "soul" -> "@tr:wowdps.school.spell_soul"
+            "holy" -> "@tr:wowdps.school.spell_holy"
+            "blood" -> "@tr:wowdps.school.spell_blood"
+            "void" -> "@tr:wowdps.school.spell_void"
+            "nature" -> "@tr:wowdps.school.spell_nature"
+            else -> "@tr:wowdps.school.spell_generic"
         }
     }
 
     private fun formatMagicSchoolShort(school: String): String = when (school) {
-        "fire" -> "Огонь"
-        "frost" -> "Лёд"
-        "arcane" -> "Аркана"
-        "lightning" -> "Молния"
-        "soul" -> "Души"
-        "holy" -> "Свет"
-        "blood" -> "Кровь"
-        "void" -> "Бездна"
-        "nature" -> "Природа"
-        else -> "Магия"
+        "fire" -> "Fire"
+        "frost" -> "Frost"
+        "arcane" -> "Arcane"
+        "lightning" -> "Lightning"
+        "soul" -> "Soul"
+        "holy" -> "Holy"
+        "blood" -> "Blood"
+        "void" -> "Void"
+        "nature" -> "Nature"
+        else -> "Magic"
     }
 
-    /**
-     * Resolves a PURE magic/rune/elemental icon for the spell itself (never returning a physical sword/staff!).
-     */
     private fun resolvePureMagicIconItem(school: String, spellId: Identifier?): String {
         val candidates = when (school) {
             "fire" -> listOf("runes:fire_stone", "minecraft:fire_charge", "minecraft:blaze_powder")

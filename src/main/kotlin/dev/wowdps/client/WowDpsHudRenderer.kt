@@ -224,8 +224,8 @@ object WowDpsHudRenderer : HudRenderCallback {
                 val totStr = CombatTrackerEngine.formatCompactNumber(t.totalDamage)
                 val dpsStr = CombatTrackerEngine.formatCompactNumber(t.totalDamage / max(1.0, durationSec))
                 val rightStat = when {
-                    width < 160 -> "$totStr ($dpsStr/с)"
-                    else -> "$totStr ($dpsStr/с, ${String.format("%.0f%%", pctOfTotal)})"
+                    width < 160 -> "$totStr (${WowDpsI18n.tr("wowdps.hud.per_sec", dpsStr)})"
+                    else -> "$totStr (${WowDpsI18n.tr("wowdps.hud.per_sec", dpsStr)}, ${String.format("%.0f%%", pctOfTotal)})"
                 }
                 val rightStatW = getScaledTextWidth(textRenderer, rightStat, adaptiveTextScale)
                 val textOffsetY = max(1, (adaptiveBarH - 7) / 2)
@@ -284,8 +284,8 @@ object WowDpsHudRenderer : HudRenderCallback {
                         val dps = CombatTrackerEngine.formatCompactNumber(c.getDps(durationSec))
                         when {
                             width < 158 -> WowDpsI18n.tr("wowdps.hud.per_sec", dps)
-                            width >= 255 -> "$tot ($dps/с | Кр ${String.format("%.0f%%", c.critPercent)} | ${String.format("%.0f%%", pctOfGroup)})"
-                            else -> "$tot ($dps/с, ${String.format("%.0f%%", pctOfGroup)})"
+                            width >= 255 -> "$tot (${WowDpsI18n.tr("wowdps.hud.per_sec", dps)} | ${WowDpsI18n.tr("wowdps.hud.crits_short")} ${String.format("%.0f%%", c.critPercent)} | ${String.format("%.0f%%", pctOfGroup)})"
+                            else -> "$tot (${WowDpsI18n.tr("wowdps.hud.per_sec", dps)}, ${String.format("%.0f%%", pctOfGroup)})"
                         }
                     }
                     MeterMode.TOTAL_DAMAGE, MeterMode.TARGETS -> {

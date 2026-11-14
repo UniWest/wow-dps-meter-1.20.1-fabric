@@ -20,7 +20,7 @@ import kotlin.math.min
  * - Tab `📈 Графики`: 4 switchable graph types.
  * - Tab `🎯 Цели`: All damaged mobs/bosses/dummies with 3D modded mob portraits.
  */
-class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Meter")) {
+class WowDpsInspectorScreen : Screen(Text.literal("DPS & Spell Meter")) {
 
     private var selectedCombatantUuid: UUID? = null
 
@@ -217,7 +217,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
         )
 
         val partyBadge = activeCombatant.getPartyBadge().let { if (it.isNotEmpty() && it != "★") " [$it]" else "" }
-        val rawHeader = "${activeCombatant.name}$partyBadge [${activeCombatant.lastAbilityName}] | УВС: ${CombatTrackerEngine.formatCompactNumber(activeCombatant.getDps(dur))}/с | Крит: ${String.format("%.0f%%", activeCombatant.critPercent)}"
+        val rawHeader = WowDpsI18n.tr("wowdps.report.header_stat", activeCombatant.name, partyBadge, activeCombatant.lastAbilityName, CombatTrackerEngine.formatCompactNumber(activeCombatant.getDps(dur)), String.format("%.0f%%", activeCombatant.critPercent))
         val safeHeader = WowDpsHudRenderer.fitTextToPixels(textRenderer, rawHeader, panelW - 44, T_SCALE)
         WowDpsHudRenderer.drawScaledText(context, textRenderer, safeHeader, panelX + 20, panelY + 6, 0xFFFFE6A3.toInt(), T_SCALE)
 
@@ -432,7 +432,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
         mouseX: Int,
         mouseY: Int
     ) {
-        val rawKpi = "Всего: ${CombatTrackerEngine.formatCompactNumber(combatant.totalDamageDealt)} | Ударов: ${combatant.totalHits} | Пик: ${CombatTrackerEngine.formatCompactNumber(combatant.peakBurstDps)}/с | Блок: ${CombatTrackerEngine.formatCompactNumber(combatant.totalMitigated)}"
+        val rawKpi = WowDpsI18n.tr("wowdps.graph.bar_kpi", CombatTrackerEngine.formatCompactNumber(combatant.totalDamageDealt), combatant.totalHits, CombatTrackerEngine.formatCompactNumber(combatant.peakBurstDps), CombatTrackerEngine.formatCompactNumber(combatant.totalMitigated))
         val safeKpi = WowDpsHudRenderer.fitTextToPixels(textRenderer, rawKpi, w - 12, T_SCALE)
         WowDpsHudRenderer.drawScaledText(context, textRenderer, safeKpi, x + 6, y + 2, 0xFFCBD5E1.toInt(), T_SCALE)
 
@@ -512,7 +512,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
             val rightW = WowDpsHudRenderer.getScaledTextWidth(textRenderer, rightStr, T_SCALE)
             WowDpsHudRenderer.drawScaledText(context, textRenderer, rightStr, x + w - rightW - 9, rowY + 2, 0xFF86EFAC.toInt(), T_SCALE)
 
-            val srcWpn = if (ab.sourceWeaponName.isNotEmpty()) " [из: ${ab.sourceWeaponName}]" else ""
+            val srcWpn = if (ab.sourceWeaponName.isNotEmpty()) WowDpsI18n.tr("wowdps.report.from_weapon", ab.sourceWeaponName) else ""
             val leftRaw = "${ab.abilityName}$srcWpn"
             val leftSafe = WowDpsHudRenderer.fitTextToPixels(textRenderer, leftRaw, w - rightW - 34, T_SCALE)
             WowDpsHudRenderer.drawScaledText(context, textRenderer, leftSafe, x + 21, rowY + 2, 0xFFFFFFFF.toInt(), T_SCALE)
@@ -520,7 +520,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
         }
 
         if (hoveredPoint != null) {
-            val tipRaw = "${hoveredPoint.secondIndex}с: ${CombatTrackerEngine.formatCompactNumber(hoveredPoint.damageInSecond)} | ${hoveredPoint.topAbilityInSecond.ifEmpty { "—" }} → ${hoveredPoint.targetInSecond.ifEmpty { "—" }}"
+            val tipRaw = "${hoveredPoint.secondIndex}${WowDpsI18n.tr("wowdps.unit.sec")}: ${CombatTrackerEngine.formatCompactNumber(hoveredPoint.damageInSecond)} | ${hoveredPoint.topAbilityInSecond.ifEmpty { "—" }} → ${hoveredPoint.targetInSecond.ifEmpty { "—" }}"
             val tipSafe = WowDpsHudRenderer.fitTextToPixels(textRenderer, tipRaw, w - 16, T_SCALE)
             val tw = WowDpsHudRenderer.getScaledTextWidth(textRenderer, tipSafe, T_SCALE) + 8
             val tx = (mouseX + 6).coerceAtMost(width - tw - 4)
@@ -732,7 +732,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
             context.fill(trackX, rowY + 1, trackX + avgW, rowY + 11, 0xCC10B981.toInt())
             context.fill(trackX + minW, rowY + 1, trackX + minW + 2, rowY + 11, 0xFF38BDF8.toInt())
 
-            val rawStat = "Мин:${CombatTrackerEngine.formatCompactNumber(minVal)} Ср:${CombatTrackerEngine.formatCompactNumber(avgVal)} Макс:${CombatTrackerEngine.formatCompactNumber(maxVal)}"
+            val rawStat = WowDpsI18n.tr("wowdps.graph.hit_stat", CombatTrackerEngine.formatCompactNumber(minVal), CombatTrackerEngine.formatCompactNumber(avgVal), CombatTrackerEngine.formatCompactNumber(maxVal))
             val safeStat = WowDpsHudRenderer.fitTextToPixels(textRenderer, rawStat, trackW - 6, 0.75f)
             WowDpsHudRenderer.drawScaledText(context, textRenderer, safeStat, trackX + 3, rowY + 2, 0xFFF8FAFC.toInt(), 0.75f)
 
@@ -760,7 +760,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
 
             WowDpsHudRenderer.drawTargetMobIcon(context, t.targetEntityTypeId, t.targetIconItemId, x + 8, rowY + 1, 0.68f)
 
-            val rightTxt = "${CombatTrackerEngine.formatCompactNumber(t.totalDamage)} (${String.format("%.0f%%", pct)}) | ${t.hits} уд."
+            val rightTxt = "${CombatTrackerEngine.formatCompactNumber(t.totalDamage)} (${String.format("%.0f%%", pct)}) | ${WowDpsI18n.tr("wowdps.hud.hits_suffix", t.hits)}"
             val rightW = WowDpsHudRenderer.getScaledTextWidth(textRenderer, rightTxt, T_SCALE)
             WowDpsHudRenderer.drawScaledText(context, textRenderer, rightTxt, x + w - rightW - 9, rowY + 3, 0xFF86EFAC.toInt(), T_SCALE)
 
@@ -820,7 +820,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
             val c2 = WowDpsHudRenderer.fitTextToPixels(textRenderer, t.lastWeaponUsed, col2W - 14, T_SCALE)
             val c3 = WowDpsHudRenderer.fitTextToPixels(textRenderer, "${t.hits}/${CombatTrackerEngine.formatCompactNumber(t.maxHit.toDouble())}", col3W, T_SCALE)
             val targetDps = CombatTrackerEngine.formatCompactNumber(t.totalDamage / max(1.0, durationSec))
-            val c4 = WowDpsHudRenderer.fitTextToPixels(textRenderer, "${CombatTrackerEngine.formatCompactNumber(t.totalDamage)} ($targetDps/с)", col4W, T_SCALE)
+            val c4 = WowDpsHudRenderer.fitTextToPixels(textRenderer, "${CombatTrackerEngine.formatCompactNumber(t.totalDamage)} (${WowDpsI18n.tr("wowdps.hud.per_sec", targetDps)})", col4W, T_SCALE)
 
             WowDpsHudRenderer.drawScaledText(context, textRenderer, c1, col1X + 16, rowY + 3, 0xFFFFFFFF.toInt(), T_SCALE)
             WowDpsHudRenderer.drawScaledText(context, textRenderer, c2, col2X + 13, rowY + 3, 0xFFCBD5E1.toInt(), T_SCALE)
@@ -934,7 +934,7 @@ class WowDpsInspectorScreen : Screen(Text.literal("WoW Details! DPS & Spell Mete
             "#${idx + 1} ${c.name} [${c.lastAbilityName} → ${c.lastTargetName}]: $tot ($dps$secUnit, ${String.format("%.0f%%", pct)})"
         }.joinToString(" | ")
 
-        val summaryLine = "[Details! ${mode.displayName} - ${CombatTrackerEngine.formatDuration(dur)}] $topList"
+        val summaryLine = "[DPS Meter - ${mode.displayName} - ${CombatTrackerEngine.formatDuration(dur)}] $topList"
         player.networkHandler.sendChatMessage(summaryLine)
     }
 

@@ -17,11 +17,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 enum class MeterMode(val keyPrefix: String, val defaultFull: String, val defaultShort: String) {
-    DPS("wowdps.mode.dps", "УВС (DPS)", "УВС"),
-    TOTAL_DAMAGE("wowdps.mode.total", "Общий урон", "Урон"),
-    TARGETS("wowdps.mode.targets", "По кому урон", "Цели"),
-    BURST_DPS("wowdps.mode.burst", "Пиковый Бурст", "Бурст"),
-    DAMAGE_TAKEN("wowdps.mode.taken", "Полученный урон", "Получ.");
+    DPS("wowdps.mode.dps", "DPS", "DPS"),
+    TOTAL_DAMAGE("wowdps.mode.total", "Total Damage", "Damage"),
+    TARGETS("wowdps.mode.targets", "Damage by Target", "Targets"),
+    BURST_DPS("wowdps.mode.burst", "Peak Burst DPS", "Burst"),
+    DAMAGE_TAKEN("wowdps.mode.taken", "Damage Taken", "Taken");
 
     val displayName: String
         get() = WowDpsI18n.tr("$keyPrefix.full").takeIf { it != "$keyPrefix.full" } ?: defaultFull
@@ -36,9 +36,9 @@ enum class MeterMode(val keyPrefix: String, val defaultFull: String, val default
  * Filter mode for FTB Teams & Open Parties and Claims teammates!
  */
 enum class GroupFilterMode(val keyPrefix: String, val defaultFull: String, val defaultShort: String) {
-    ALL("wowdps.filter.all", "Все игроки", "Все"),
-    PARTY_ONLY("wowdps.filter.party", "Только группа (FTB/OPAC)", "Пати"),
-    SELF_ONLY("wowdps.filter.self", "Только я", "Я");
+    ALL("wowdps.filter.all", "All Players", "All"),
+    PARTY_ONLY("wowdps.filter.party", "Party Only (FTB/OPAC)", "Party"),
+    SELF_ONLY("wowdps.filter.self", "Only Me", "Me");
 
     val displayName: String
         get() = WowDpsI18n.tr("$keyPrefix.full").takeIf { it != "$keyPrefix.full" } ?: defaultFull
@@ -66,20 +66,20 @@ enum class SegmentView {
 }
 
 enum class InspectorTab(val key: String, val defaultTitle: String) {
-    GRAPHS("wowdps.tab.graphs", "Графики"),
-    ABILITIES("wowdps.tab.abilities", "Заклинания"),
-    WEAPON_TREE("wowdps.tab.weapon_tree", "Развёртка посохов/оружия"),
-    TARGETS("wowdps.tab.targets", "Цели");
+    GRAPHS("wowdps.tab.graphs", "Graphs"),
+    ABILITIES("wowdps.tab.abilities", "Spells"),
+    WEAPON_TREE("wowdps.tab.weapon_tree", "Breakdown"),
+    TARGETS("wowdps.tab.targets", "Targets");
 
     val title: String
         get() = WowDpsI18n.tr(key).takeIf { it != key } ?: defaultTitle
 }
 
 enum class GraphType(val key: String, val defaultTitle: String) {
-    BAR_TIMELINE("wowdps.graph.bar_timeline", "1. Столбчатый УВС"),
-    AREA_CURVE("wowdps.graph.area_curve", "2. Площадной"),
-    DONUT_PIE("wowdps.graph.donut_pie", "3. Круговая диагр."),
-    HIT_HISTOGRAM("wowdps.graph.hit_histogram", "4. Гистограмма");
+    BAR_TIMELINE("wowdps.graph.bar_timeline", "1. Bar DPS Timeline"),
+    AREA_CURVE("wowdps.graph.area_curve", "2. Area Curve"),
+    DONUT_PIE("wowdps.graph.donut_pie", "3. Donut Pie"),
+    HIT_HISTOGRAM("wowdps.graph.hit_histogram", "4. Hit Histogram");
 
     val title: String
         get() = WowDpsI18n.tr(key).takeIf { it != key } ?: defaultTitle
@@ -190,7 +190,7 @@ class CombatantStats(
     var teamSystem: String = ""
     var isServerTeammate: Boolean = false
 
-    var lastAbilityName: String = "Атака"
+    var lastAbilityName: String = WowDpsI18n.tr("wowdps.attack.generic")
     var lastIconItemId: String = "minecraft:iron_sword"
     var lastSpellTextureId: String = ""
     var lastMagicSchool: String = "physical"
@@ -235,7 +235,7 @@ class CombatantStats(
         if (event.teamSystem.isNotEmpty()) teamSystem = event.teamSystem
         if (event.isTeammate) isServerTeammate = true
 
-        val resolvedSpellName = CombatTrackerEngine.resolveClientSpellName(event.spellId, event.abilityId)
+        val resolvedSpellName = CombatTrackerEngine.resolveClientSpellName(event.spellId, WowDpsI18n.resolveServerText(event.abilityId))
 
         totalDamageDealt += dmg
         totalMitigated += event.mitigatedDamage.toDouble()
@@ -248,7 +248,7 @@ class CombatantStats(
         lastSpellTextureId = event.spellTextureId
         lastMagicSchool = event.magicSchool
         lastIconHasGlint = event.iconHasGlint
-        lastSourceWeaponName = event.sourceWeaponName
+        lastSourceWeaponName = WowDpsI18n.resolveServerText(event.sourceWeaponName)
         lastTargetName = event.victimName
         lastTargetEntityTypeId = event.victimEntityTypeId
         lastTargetIconId = event.targetIconItemId
@@ -275,7 +275,7 @@ class CombatantStats(
                 magicSchool = event.magicSchool,
                 iconHasGlint = event.iconHasGlint,
                 damageTypeId = event.damageTypeId,
-                sourceWeaponName = event.sourceWeaponName,
+                sourceWeaponName = WowDpsI18n.resolveServerText(event.sourceWeaponName),
                 sourceWeaponIconId = event.sourceWeaponIconId
             )
         }
@@ -283,7 +283,7 @@ class CombatantStats(
         if (event.spellTextureId.isNotEmpty()) ability.spellTextureId = event.spellTextureId
         if (event.magicSchool != "physical") ability.magicSchool = event.magicSchool
         if (event.sourceWeaponName.isNotEmpty()) {
-            ability.sourceWeaponName = event.sourceWeaponName
+            ability.sourceWeaponName = WowDpsI18n.resolveServerText(event.sourceWeaponName)
             ability.sourceWeaponIconId = event.sourceWeaponIconId
         }
         ability.iconHasGlint = ability.iconHasGlint || event.iconHasGlint
@@ -298,7 +298,7 @@ class CombatantStats(
         ability.lastTargetHit = event.victimName
 
         // 2. Record into Hierarchical Weapon -> Spells Breakdown ("Развёртка посоха/меча -> магия")
-        val wName = event.sourceWeaponName.ifEmpty { WowDpsI18n.tr("wowdps.wpn.default_group") }
+        val wName = WowDpsI18n.resolveServerText(event.sourceWeaponName).ifEmpty { WowDpsI18n.tr("wowdps.wpn.default_group") }
         val weaponGroup = weaponBreakdowns.getOrPut(wName) {
             WeaponSourceBreakdown(
                 weaponName = wName,
@@ -341,7 +341,7 @@ class CombatantStats(
         val targetStat = targets.getOrPut(targetKey) {
             TargetDamageStats(
                 targetName = event.victimName,
-                targetTypeName = event.victimTypeName,
+                targetTypeName = WowDpsI18n.resolveServerText(event.victimTypeName),
                 targetEntityTypeId = event.victimEntityTypeId,
                 targetIconItemId = event.targetIconItemId,
                 isBoss = event.victimIsBoss
@@ -451,7 +451,8 @@ class CombatSegment(
 ) {
     var endTimeMs: Long = startTimeMs
     var inCombat: Boolean = false
-    var primaryTargetName: String = "Ожидание"
+    var primaryTargetName: String = ""
+        get() = field.ifEmpty { WowDpsI18n.tr("wowdps.hud.waiting_short") }
     var primaryTargetEntityTypeId: String = ""
     var primaryTargetIconId: String = "minecraft:armor_stand"
     var isBossEncounter: Boolean = false
@@ -471,7 +472,7 @@ class CombatSegment(
         val t = allTargets.getOrPut(key) {
             TargetDamageStats(
                 targetName = event.victimName,
-                targetTypeName = event.victimTypeName,
+                targetTypeName = WowDpsI18n.resolveServerText(event.victimTypeName),
                 targetEntityTypeId = event.victimEntityTypeId,
                 targetIconItemId = event.targetIconItemId,
                 isBoss = event.victimIsBoss
@@ -572,10 +573,10 @@ object CombatTrackerEngine {
     var inspectorW: Int = 360
     var inspectorH: Int = 220
 
-    var overallSegment = CombatSegment("Весь бой")
+    var overallSegment = CombatSegment("Overall")
         private set
 
-    var currentSegment = CombatSegment("Ожидание...")
+    var currentSegment = CombatSegment("Waiting...")
         private set
 
     private val fightHistory = ArrayDeque<CombatSegment>()
@@ -604,7 +605,7 @@ object CombatTrackerEngine {
                 }
             }
         }
-        return serverAbilityName
+        return WowDpsI18n.resolveServerText(serverAbilityName)
     }
 
     fun getIconStack(iconItemId: String, hasGlint: Boolean): ItemStack {
@@ -683,7 +684,7 @@ object CombatTrackerEngine {
                 currentSegment.primaryTargetIconId = event.targetIconItemId
                 if (event.victimIsBoss && !currentSegment.isBossEncounter) {
                     currentSegment.isBossEncounter = true
-                    currentSegment.title = "[Босс] ${event.victimName}"
+                    currentSegment.title = WowDpsI18n.tr("wowdps.attack.boss_prefix", event.victimName)
                 }
             }
 
@@ -748,7 +749,7 @@ object CombatTrackerEngine {
                 ) {
                     val diff = prevHp - curHp
                     val mainHand = localPlayer.mainHandStack
-                    val weaponName = mainHand.takeIf { !it.isEmpty }?.name?.string ?: "Рукопашный бой"
+                    val weaponName = mainHand.takeIf { !it.isEmpty }?.name?.string ?: WowDpsI18n.tr("wowdps.attack.hand")
                     val iconId = if (!mainHand.isEmpty) {
                         Registries.ITEM.getId(mainHand.item).toString()
                     } else {
@@ -766,7 +767,7 @@ object CombatTrackerEngine {
                         targetIconItemId = "minecraft:skeleton_skull",
                         victimIsBoss = entity.maxHealth >= 100f,
                         spellId = "",
-                        abilityId = "Удар: $weaponName",
+                        abilityId = WowDpsI18n.tr("wowdps.attack.melee", weaponName),
                         iconItemId = iconId,
                         spellTextureId = "",
                         magicSchool = "physical",

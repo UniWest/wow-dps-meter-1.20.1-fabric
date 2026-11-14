@@ -95,7 +95,7 @@ object PartyTeamIntegration {
             return ServerTeamResolution(
                 teamId = "sb:${sbTeam.name}",
                 teamName = sbTeam.name,
-                teamSystem = "Тим",
+                teamSystem = "Team",
                 memberUuids = teamMembers
             )
         }
@@ -169,8 +169,8 @@ object PartyTeamIntegration {
             val regName = invokeNoArg(party, "getRegisteredName")?.toString()?.takeIf { it.isNotBlank() }
             val defName = invokeNoArg(party, "getDefaultName")?.toString()?.takeIf { it.isNotBlank() }
             val ownerObj = invokeNoArg(party, "getOwner")
-            val ownerName = invokeNoArg(ownerObj, "getUsername")?.toString() ?: "Пати"
-            val partyName = regName ?: defName ?: "Отряд $ownerName"
+            val ownerName = invokeNoArg(ownerObj, "getUsername")?.toString() ?: "Party"
+            val partyName = regName ?: defName ?: "Party $ownerName"
 
             val members = linkedSetOf<UUID>()
             members.add(playerUuid)
@@ -353,7 +353,7 @@ object PartyTeamIntegration {
         val ftbStatus = resolveFtbClientParty(localPlayer?.uuid)
         if (ftbStatus != null && targetUuid in ftbStatus.memberUuids) return "FTB"
 
-        return if (WowDpsI18n.isRussian()) "Пати" else "Party"
+        return WowDpsI18n.tr("wowdps.team.party")
     }
 
     fun getClientPartyStatus(localPlayer: PlayerEntity?): ClientPartyStatus {
@@ -369,12 +369,12 @@ object PartyTeamIntegration {
         val syncedAllies = serverSyncedTeammateFlags.filterValues { it }.keys.toMutableSet()
         if (localUuid != null) syncedAllies.add(localUuid)
         if (syncedAllies.size > 1) {
-            val badge = serverSyncedTeamBadge.values.firstOrNull { it.isNotEmpty() } ?: "Пати"
-            val tName = serverSyncedTeamName.values.firstOrNull { it.isNotEmpty() } ?: "Группа"
+            val badge = serverSyncedTeamBadge.values.firstOrNull { it.isNotEmpty() } ?: WowDpsI18n.tr("wowdps.team.party")
+            val tName = serverSyncedTeamName.values.firstOrNull { it.isNotEmpty() } ?: WowDpsI18n.tr("wowdps.team.party")
             val sysFull = when (badge) {
                 "FTB" -> "FTB Teams"
                 "OPAC" -> "Open Parties"
-                else -> "Группа"
+                else -> WowDpsI18n.tr("wowdps.team.party")
             }
             return ClientPartyStatus(sysFull, badge, tName, syncedAllies)
         }
@@ -389,7 +389,7 @@ object PartyTeamIntegration {
                     members.add(p.uuid)
                 }
             }
-            return ClientPartyStatus("Команда", "Тим", sbTeam.name, members)
+            return ClientPartyStatus(WowDpsI18n.tr("wowdps.team.scoreboard"), WowDpsI18n.tr("wowdps.team.scoreboard"), sbTeam.name, members)
         }
 
         // 5. If FTB Teams or OPAC is installed, show ready status even when solo

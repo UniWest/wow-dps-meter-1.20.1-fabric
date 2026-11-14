@@ -1,6 +1,6 @@
-# WoW Details! DPS & Spell Meter (Minecraft 1.20.1 Fabric)
+# DPS & Spell Meter (Minecraft 1.20.1 Fabric)
 
-World of Warcraft (*Details! / Recount*) style DPS, Damage, and Spell Meter mod written in **Kotlin** for **Minecraft 1.20.1 (Fabric)**. Built for the **Prominence II: Hasturian Era** RPG modpack while remaining 100% compatible with vanilla Minecraft + Fabric API.
+Real-time DPS, Damage, and Spell Meter mod written in **Kotlin** for **Minecraft 1.20.1 (Fabric)**. Built for the **Prominence II: Hasturian Era** RPG modpack while remaining 100% compatible with vanilla Minecraft + Fabric API.
 
 ## ✨ Key Features
 
@@ -33,7 +33,7 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
 .\gradlew.bat build
 ```
 
-The compiled mod JAR will be output to `build/libs/wow-dps-meter-8.1.0.jar`.
+The compiled mod JAR will be output to `build/libs/wow-dps-meter-8.2.0.jar`.
 
 ## 📦 Dependencies
 
